@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Spice Route Billing</title>
+<style>
+:root{--bg:#eef2ee;--card:#fff;--ink:#12201c;--mut:#5c6b66;--line:#d5ded9;--acc:#0f5c4a;--on:#fff;--gold:#d99a0b;--bad:#b3261e;--chip:#e2eae6;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#0f1714;--card:#17231f;--ink:#e8f0ec;--mut:#9bb0a8;--line:#2b3b35;--acc:#3fbf9f;--on:#06150f;--gold:#f2b632;--bad:#ff8a80;--chip:#203029}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#0f1714;--card:#17231f;--ink:#e8f0ec;--mut:#9bb0a8;--line:#2b3b35;--acc:#3fbf9f;--on:#06150f;--gold:#f2b632;--bad:#ff8a80;--chip:#203029}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:1180px;margin:0 auto;padding:14px}
+header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+h1{font:700 26px/1.1 Georgia,"Times New Roman",serif;margin:0;letter-spacing:.2px}
+h2{font:700 18px Georgia,serif;margin:0 0 10px}
+nav{display:flex;gap:6px;flex-wrap:wrap}
+button,select,input{font:inherit;color:inherit}
+nav button{border:1px solid var(--line);background:var(--card);padding:7px 14px;border-radius:20px;cursor:pointer}
+nav button.on{background:var(--acc);color:var(--on);border-color:var(--acc)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:12px}
+.pos{display:grid;grid-template-columns:1fr 340px;gap:14px;align-items:start}
+@media(max-width:820px){.pos{grid-template-columns:1fr}}
+input,select{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.chip{border:0;background:var(--chip);padding:5px 12px;border-radius:16px;cursor:pointer}
+.chip.on{background:var(--acc);color:var(--on)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.item{text-align:left;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px;cursor:pointer;display:flex;flex-direction:column;gap:3px}
+.item:hover{border-color:var(--acc)}.item:disabled{opacity:.45;cursor:not-allowed}
+.item b{font-weight:600}.price{color:var(--gold);font-weight:700}.sm{font-size:12px;color:var(--mut)}.low{color:var(--bad)}
+.row{display:flex;gap:8px;margin-bottom:10px}
+.line{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;padding:6px 0;border-bottom:1px dashed var(--line)}
+.qty{display:flex;align-items:center;gap:6px}
+.qty button,.btn{border:1px solid var(--line);background:var(--chip);border-radius:6px;cursor:pointer;padding:3px 9px}
+.btn.p{background:var(--acc);color:var(--on);border-color:var(--acc);padding:10px;width:100%;font-weight:700;margin-top:10px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.tot{display:flex;justify-content:space-between;padding:3px 0}
+.tot.g{font:700 20px Georgia,serif;border-top:2px solid var(--ink);margin-top:6px;padding-top:8px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:12px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px}
+.kpi b{display:block;font:700 22px Georgia,serif}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:820px){.two{grid-template-columns:1fr}}
+.chart{display:flex;align-items:stretch;gap:4px;height:160px}
+.col{flex:1;display:flex;flex-direction:column;align-items:center;font-size:10px;color:var(--mut)}
+.bw{flex:1;width:100%;display:flex;align-items:flex-end}.bar{width:100%;background:var(--acc);border-radius:3px 3px 0 0;min-height:2px}
+.hb{margin:6px 0}.hb i{display:block;height:8px;background:var(--gold);border-radius:4px;margin-top:3px}
+.scroll{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);white-space:nowrap}th{color:var(--mut);font-weight:600}td.r,th.r{text-align:right}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:16px;z-index:20}
+.rcpt{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:18px;width:100%;max-width:360px;max-height:90vh;overflow:auto;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px}
+.rcpt h3{font:700 18px Georgia,serif;text-align:center;margin:0}.rcpt hr{border:0;border-top:1px dashed var(--mut);margin:8px 0}
+.rcpt .tot{padding:1px 0}.ctr{text-align:center;color:var(--mut)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;z-index:30;max-width:90vw}
+.toast.err{background:var(--bad);color:#fff}
+.form{display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:8px}@media(max-width:820px){.form{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header><h1>Spice Route Billing</h1><nav id="nav"></nav></header>
+<section id="pos" class="pos">
+  <div>
+    <div class="card"><input id="q" placeholder="Search the menu" oninput="Q=this.value;rGrid()"><div id="chips" class="chips"></div></div>
+    <div id="grid" class="grid"></div>
+  </div>
+  <aside class="card"><h2>Current bill</h2>
+    <div class="row"><select id="cu" onchange="CU=+this.value"></select><select id="tb" onchange="TB=+this.value" style="max-width:110px"></select></div>
+    <div id="cart"></div>
+  </aside>
+</section>
+<section id="dash" hidden></section>
+<section id="menu" hidden></section>
+<section id="log" hidden></section>
+</div>
+<div id="modal" class="modal" hidden onclick="if(event.target===this)this.hidden=true"></div>
+<div id="toast" class="toast" hidden></div>
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const r2=n=>Math.round(n*100)/100;
+const money=n=>'\u20B9'+Number(n).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fnDisc=s=>r2(s*(s>=2000?.15:s>=1000?.10:s>=500?.05:0));
+const fnGst=a=>r2(a*.05);
+const dk=t=>{const d=new Date(t);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const fdt=t=>new Date(t).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+const M0='Paneer Butter Masala|Main|260;Butter Naan|Bread|40;Veg Biryani|Main|220;Masala Chai|Beverage|30;Gulab Jamun|Dessert|80;Paneer Tikka|Starter|220;Veg Spring Roll|Starter|150;Hara Bhara Kebab|Starter|180;Crispy Corn|Starter|160;Mushroom Chilli|Starter|190;Dal Makhani|Main|210;Kadai Paneer|Main|250;Shahi Paneer|Main|270;Mix Veg Curry|Main|180;Chole Masala|Main|170;Malai Kofta|Main|240;Jeera Rice|Rice|120;Steamed Rice|Rice|90;Veg Fried Rice|Rice|160;Tandoori Roti|Bread|20;Garlic Naan|Bread|55;Laccha Paratha|Bread|50;Cold Coffee|Beverage|90;Fresh Lime Soda|Beverage|60;Sweet Lassi|Beverage|70;Mango Shake|Beverage|110;Ice Cream Sundae|Dessert|120;Brownie with Ice Cream|Dessert|150;Rasmalai|Dessert|90;Kheer|Dessert|80';
+const C0='Walk-in,Aman Sharma,Riya Verma,Priya Singh,Rohan Mehta,Sneha Kapoor,Karan Malhotra,Anjali Gupta,Vikram Chauhan,Neha Joshi,Arjun Reddy,Pooja Nair,Rahul Bansal,Simran Kaur,Harpreet Singh';
+const CATS=['All','Starter','Main','Rice','Bread','Beverage','Dessert'], LOW=30;
+function rng(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+// post() mirrors the SQL logic: stock check, discount slab, GST, stock update, audit entry
+function post(S,o){
+  const map={};o.items.forEach(i=>map[i.id]=(map[i.id]||0)+i.qty);
+  const lines=Object.keys(map).map(id=>{const m=S.menu.find(x=>x.id==id),q=map[id];
+    if(m.stock<q)throw new Error('Insufficient stock for '+m.name+' ('+m.stock+' left)');
+    return{id:m.id,name:m.name,price:m.price,qty:q,line:r2(m.price*q)}});
+  lines.forEach(l=>S.menu.find(x=>x.id==l.id).stock-=l.qty);
+  const sub=r2(lines.reduce((a,l)=>a+l.line,0)),disc=fnDisc(sub),gst=fnGst(sub-disc),total=r2(sub-disc+gst);
+  const b={id:S.nextBill++,cust:o.cust,table:o.table,date:o.date,lines,sub,disc,gst,total};
+  S.bills.push(b);S.audit.push({t:o.date,msg:'Bill '+b.id+' paid. Total = '+money(total)});
+  return b;
+}
+function fresh(){
+  const S={menu:M0.split(';').map((x,i)=>{const p=x.split('|');return{id:i+1,name:p[0],cat:p[1],price:+p[2],stock:45}}),customers:C0.split(','),bills:[],audit:[],nextBill:1001};
+  const R=rng(2026),ds=[];
+  for(let k=0;k<45;k++){const d=new Date();d.setDate(d.getDate()-Math.floor(R()*30));d.setHours(11+Math.floor(R()*11),Math.floor(R()*60),0,0);ds.push(d.getTime())}
+  ds.sort((a,b)=>a-b).forEach(t=>{const items=[];for(let j=0,n=2+Math.floor(R()*4);j<n;j++)items.push({id:1+Math.floor(R()*S.menu.length),qty:1+Math.floor(R()*3)});
+    post(S,{cust:Math.floor(R()*S.customers.length),table:1+Math.floor(R()*12),items,date:t})});
+  return S;
+}
+let S={menu:[],customers:[],bills:[],audit:[],nextBill:0};
+const api=async(u,o)=>{const r=await fetch(u,o&&{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(o)});const j=await r.json();if(!r.ok)throw new Error(j.error||'Server error');return j};
+async function load(){S=await api('/api/state');$('#cu').innerHTML=S.customers.map((c,i)=>`<option value="${i}" ${i===CU?'selected':''}>${esc(c)}</option>`).join('');rGrid();rCart();if(TAB==='dash')rDash();if(TAB==='menu')rMenu();if(TAB==='log')rLog()}
+let cart={},CU=0,TB=1,CAT='All',Q='',TAB='pos';
+const toast=(m,err)=>{const t=$('#toast');t.textContent=m;t.className='toast'+(err?' err':'');t.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(()=>t.hidden=true,2600)};
+const TABS=[['pos','New bill'],['dash','Sales dashboard'],['menu','Menu and stock'],['log','Bills and audit log']];
+function go(t){TAB=t;TABS.forEach(x=>$('#'+x[0]).hidden=x[0]!==t);rNav();if(t==='dash')rDash();if(t==='menu')rMenu();if(t==='log')rLog()}
+const rNav=()=>$('#nav').innerHTML=TABS.map(x=>`<button class="${x[0]===TAB?'on':''}" onclick="go('${x[0]}')">${x[1]}</button>`).join('');
+function rChips(){$('#chips').innerHTML=CATS.map(c=>`<button class="chip ${c===CAT?'on':''}" onclick="CAT='${c}';rChips();rGrid()">${c}</button>`).join('')}
+function rGrid(){
+  const l=S.menu.filter(m=>(CAT==='All'||m.cat===CAT)&&m.name.toLowerCase().includes(Q.toLowerCase()));
+  $('#grid').innerHTML=l.length?l.map(m=>`<button class="item" ${m.stock<1?'disabled':''} onclick="add(${m.id})"><b>${esc(m.name)}</b><span class="price">${money(m.price)}</span><span class="sm ${m.stock<=LOW?'low':''}">${m.stock<1?'Out of stock':m.stock+' in stock'}</span></button>`).join(''):'<p class="sm">No dishes match. Try a different search or category.</p>';
+}
+function add(id,d=1){const m=S.menu.find(x=>x.id===id),n=(cart[id]||0)+d;
+  if(n>m.stock){toast('Only '+m.stock+' of '+m.name+' left',1);return}
+  if(n<1)delete cart[id];else cart[id]=n;rCart()}
+function rCart(){
+  const ids=Object.keys(cart);let sub=0;
+  const rows=ids.map(id=>{const m=S.menu.find(x=>x.id==id),ln=m.price*cart[id];sub+=ln;
+    return`<div class="line"><div>${esc(m.name)}<div class="sm">${money(m.price)} each</div></div><div class="qty"><button onclick="add(${m.id},-1)">-</button>${cart[id]}<button onclick="add(${m.id},1)">+</button></div><b>${money(ln)}</b></div>`}).join('');
+  sub=r2(sub);const d=fnDisc(sub),g=fnGst(sub-d);
+  $('#cart').innerHTML=(rows||'<p class="sm">Tap a dish to add it to this bill.</p>')+
+   `<div style="margin-top:10px"><div class="tot"><span>Subtotal</span><span>${money(sub)}</span></div><div class="tot"><span>Discount</span><span>-${money(d)}</span></div><div class="tot"><span>GST (5%)</span><span>${money(g)}</span></div><div class="tot g"><span>Total</span><span>${money(r2(sub-d+g))}</span></div></div>
+   <button class="btn p" ${ids.length?'':'disabled'} onclick="pay()">Finalize and pay</button><button class="btn" style="width:100%;margin-top:8px" ${ids.length?'':'disabled'} onclick="cart={};rCart()">Clear bill</button>`;
+}
+async function pay(){
+  try{const r=await api('/api/bills',{cust:CU,table:TB,items:Object.keys(cart).map(id=>({id:+id,qty:cart[id]}))});
+    cart={};await load();receipt(r.bill_id);toast('Bill '+r.bill_id+' paid')}
+  catch(e){toast(e.message,1)}
+}
+function receipt(id){
+  const b=S.bills.find(x=>x.id===id);if(!b)return;
+  $('#modal').innerHTML=`<div class="rcpt"><h3>Spice Route</h3><div class="ctr">Restaurant bill</div><hr>
+  <div>Bill no: ${b.id}</div><div>Customer: ${esc(S.customers[b.cust]||'Walk-in')}</div><div>Table: ${b.table}</div><div>Date: ${fdt(b.date)}</div><hr>
+  ${b.lines.map(l=>`<div class="tot"><span>${esc(l.name)} x${l.qty}</span><span>${money(l.line)}</span></div>`).join('')}<hr>
+  <div class="tot"><span>Subtotal</span><span>${money(b.sub)}</span></div><div class="tot"><span>Discount</span><span>-${money(b.disc)}</span></div><div class="tot"><span>GST (5%)</span><span>${money(b.gst)}</span></div>
+  <div class="tot g"><span>TOTAL</span><span>${money(b.total)}</span></div><hr><div class="ctr">Thank you, visit again</div>
+  <button class="btn p" onclick="$('#modal').hidden=true">Close</button></div>`;
+  $('#modal').hidden=false;
+}
+function rDash(){
+  const B=S.bills,rev=r2(B.reduce((a,b)=>a+b.total,0)),units=B.reduce((a,b)=>a+b.lines.reduce((x,l)=>x+l.qty,0),0),dsc=r2(B.reduce((a,b)=>a+b.disc,0));
+  const days=[],by={};for(let i=13;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);days.push(dk(d.getTime()))}
+  B.forEach(b=>by[dk(b.date)]=(by[dk(b.date)]||0)+b.total);const mx=Math.max(1,...days.map(d=>by[d]||0));
+  const cat={},it={},cu={};
+  B.forEach(b=>{cu[b.cust]=(cu[b.cust]||0)+b.total;b.lines.forEach(l=>{const m=S.menu.find(x=>x.id===l.id);const c=m?m.cat:'Other';cat[c]=(cat[c]||0)+l.line;it[l.name]=it[l.name]||{q:0,r:0};it[l.name].q+=l.qty;it[l.name].r+=l.line})});
+  const cmax=Math.max(1,...Object.values(cat)),low=S.menu.filter(m=>m.stock<=LOW).sort((a,b)=>a.stock-b.stock);
+  $('#dash').innerHTML=`<div class="kpis"><div class="kpi">Revenue<b>${money(rev)}</b></div><div class="kpi">Bills paid<b>${B.length}</b></div><div class="kpi">Average bill<b>${money(B.length?rev/B.length:0)}</b></div><div class="kpi">Items sold<b>${units}</b></div><div class="kpi">Discounts given<b>${money(dsc)}</b></div></div>
+  <div class="card"><h2>Daily sales, last 14 days</h2><div class="chart">${days.map(d=>`<div class="col" title="${d}: ${money(by[d]||0)}"><div class="bw"><div class="bar" style="height:${(by[d]||0)/mx*100}%"></div></div><span>${d.slice(8)}</span></div>`).join('')}</div></div>
+  <div class="two"><div class="card"><h2>Revenue by category</h2>${Object.entries(cat).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div class="hb"><div class="tot"><span>${k}</span><span>${money(v)}</span></div><i style="width:${v/cmax*100}%"></i></div>`).join('')}</div>
+  <div class="card"><h2>Top customers</h2><table>${Object.entries(cu).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([k,v])=>`<tr><td>${esc(S.customers[k]||'Walk-in')}</td><td class="r">${money(v)}</td></tr>`).join('')}</table></div></div>
+  <div class="two"><div class="card"><h2>Best-selling dishes</h2><div class="scroll"><table><tr><th>Dish</th><th class="r">Sold</th><th class="r">Revenue</th></tr>${Object.entries(it).sort((a,b)=>b[1].q-a[1].q).slice(0,8).map(([k,v])=>`<tr><td>${esc(k)}</td><td class="r">${v.q}</td><td class="r">${money(v.r)}</td></tr>`).join('')}</table></div></div>
+  <div class="card"><h2>Low stock</h2>${low.length?`<table>${low.map(m=>`<tr><td>${esc(m.name)}</td><td class="r low">${m.stock} left</td></tr>`).join('')}</table>`:'<p class="sm">Every dish has healthy stock.</p>'}</div></div>`;
+}
+function rMenu(){
+  $('#menu').innerHTML=`<div class="card"><h2>Add a dish</h2><div class="form"><input id="nn" placeholder="Dish name"><select id="nc">${CATS.slice(1).map(c=>`<option>${c}</option>`).join('')}</select><input id="np" type="number" min="1" placeholder="Price"><input id="ns" type="number" min="0" placeholder="Stock"><button class="btn p" style="margin:0" onclick="addDish()">Add dish</button></div></div>
+  <div class="card scroll"><h2>Menu and stock</h2><table><tr><th>Dish</th><th>Category</th><th class="r">Price</th><th class="r">Stock</th><th></th></tr>${S.menu.map(m=>`<tr><td>${esc(m.name)}</td><td>${m.cat}</td><td class="r">${money(m.price)}</td><td class="r ${m.stock<=LOW?'low':''}">${m.stock}</td><td class="r"><button class="btn" onclick="restock(${m.id})">Restock +20</button></td></tr>`).join('')}</table></div>`;
+}
+function addDish(){const n=$('#nn').value.trim(),p=+$('#np').value,s=+$('#ns').value;
+  if(!n||!(p>0)||s<0||$('#ns').value===''){toast('Enter a name, a price above zero, and a stock quantity',1);return}
+  api('/api/menu',{name:n,cat:$('#nc').value,price:p,stock:s}).then(()=>{load();toast(n+' added to the menu')}).catch(e=>toast(e.message,1))}
+function restock(id){api('/api/restock',{id}).then(()=>{load();toast('Restocked +20')}).catch(e=>toast(e.message,1))}
+function rLog(){
+  $('#log').innerHTML=`<div class="two"><div class="card scroll"><h2>Recent bills</h2><table><tr><th>Bill</th><th>Date</th><th>Customer</th><th class="r">Total</th><th></th></tr>${S.bills.slice(-20).reverse().map(b=>`<tr><td>${b.id}</td><td>${fdt(b.date)}</td><td>${esc(S.customers[b.cust]||'Walk-in')}</td><td class="r">${money(b.total)}</td><td><button class="btn" onclick="receipt(${b.id})">View</button></td></tr>`).join('')}</table></div>
+  <div class="card scroll"><h2>Audit log</h2><table><tr><th>Time</th><th>Event</th></tr>${S.audit.slice(-20).reverse().map(a=>`<tr><td>${fdt(a.t)}</td><td>${esc(a.msg)}</td></tr>`).join('')}</table>
+  </div></div>`;
+}
+
+$('#tb').innerHTML=Array.from({length:12},(_,i)=>`<option value="${i+1}">Table ${i+1}</option>`).join('');
+rNav();rChips();rGrid();rCart();load().catch(e=>toast('Cannot reach the database: '+e.message,1));
+</script>
+</body>
+</html>
